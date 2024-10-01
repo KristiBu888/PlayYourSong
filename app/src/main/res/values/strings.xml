@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PlayYourSong</string>
+    <string name="select_audio">Выбрать аудио</string>
+</resources>
