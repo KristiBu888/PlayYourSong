@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">PlayYourSong</string>
     <string name="select_audio">Выбрать аудио</string>
+    <string name="no_audio_selected">Аудио не выбрано</string>
 </resources>

@@ -1,97 +1,60 @@
 package com.example.playyoursong;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.widget.Button;
+import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.IOException;
-
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private TextView selectedAudioText;
+    private Uri selectedAudioUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Кнопка для выбора аудио
         Button selectAudioButton = findViewById(R.id.select_audio_button);
+        selectedAudioText = findViewById(R.id.selected_audio_text);
 
-        // Обработка нажатия на кнопку
+        // Лаунчер для выбора аудио
+        ActivityResultLauncher<Intent> audioPickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        selectedAudioUri = result.getData().getData();
+                        if (selectedAudioUri != null) { // Проверка на null
+                            String audioName = getFileName(selectedAudioUri); // Метод для получения имени файла
+                            selectedAudioText.setText(audioName);
+                        }
+                    }
+                });
+
+        // Кнопка для выбора аудио
         selectAudioButton.setOnClickListener(v -> {
+            // Проверяем разрешения
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_AUDIO);
-            } else {
-                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+                requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO}, 1);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             }
+
+            // Открываем аудио-пикер для выбора песни
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            audioPickerLauncher.launch(intent);
         });
     }
 
-    // Регистрация ActivityResultLauncher для выбора аудио
-    private final ActivityResultLauncher<Intent> selectAudioLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Uri selectedAudioUri = result.getData().getData();
-                    playSelectedAudio(selectedAudioUri);  // Воспроизведение аудиофайла
-                }
-            });
-
-    // Регистрация ActivityResultLauncher для запроса разрешений
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    selectAudio();
-                } else {
-                    showPermissionRationale();
-                }
-            });
-
-    // Метод для выбора аудиофайла
-    private void selectAudio() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-        selectAudioLauncher.launch(intent);
-    }
-
-    // Метод для воспроизведения выбранного аудиофайла
-    private void playSelectedAudio(Uri audioUri) {
-        MediaPlayer mediaPlayer = new MediaPlayer();
-        try {
-            mediaPlayer.setDataSource(this, audioUri);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            Log.e(TAG, "Ошибка воспроизведения аудиофайла", e);  // Использование Log.e вместо printStackTrace
-        } finally {
-            // Освобождение ресурсов после воспроизведения
-            mediaPlayer.setOnCompletionListener(MediaPlayer::release);
-        }
-    }
-
-    // Показать объяснение необходимости разрешений
-    private void showPermissionRationale() {
-        new AlertDialog.Builder(this)
-                .setTitle("Требуется разрешение")
-                .setMessage("Этому приложению требуется доступ к аудиофайлам для их воспроизведения.")
-                .setPositiveButton("OK", (dialog, which) -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_AUDIO);
-                    } else {
-                        requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
-                    }
-                })
-                .setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss())
-                .create()
-                .show();
+    // Метод для получения имени аудиофайла
+    private String getFileName(Uri uri) {
+        return uri.getLastPathSegment(); // Пример получения имени файла из URI
     }
 }

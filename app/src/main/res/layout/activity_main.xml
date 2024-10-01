@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    tools:ignore="ExtraText">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
 
+    <!-- Текст "Аудио не выбрано" -->
+    <TextView
+        android:id="@+id/selected_audio_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_audio_selected"
+        android:textSize="18sp"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Кнопка для выбора аудио -->
     <Button
         android:id="@+id/select_audio_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/select_audio"
-        android:layout_gravity="center" />
-</RelativeLayout>
+        android:text="@string/select_audio" />
+</LinearLayout>
