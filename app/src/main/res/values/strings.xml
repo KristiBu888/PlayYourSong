@@ -5,4 +5,5 @@
 <string name="selected_audio">Выбранное аудио: %1$s</string> <!-- Строка с заполнителем -->
 <string name="audio_not_selected">Аудио не выбрано</string>
 <string name="permission_denied_message">Разрешение на доступ к аудио отклонено</string> <!-- Сообщение о отказе в разрешении -->
+<string name="start_game">Начать игру</string>
 </resources>
